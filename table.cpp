@@ -5,6 +5,7 @@
 #include "entry.h"
 #include <sstream>
 #include "table.h"
+#include <string>
 
 Table::Table(unsigned int max_entries = 100) {
 
