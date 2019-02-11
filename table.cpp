@@ -9,11 +9,21 @@
 
 Table::Table(unsigned int max_entries = 100) {
 
-  hashTable(max_entries);
+  size = max_entries;
+  hashTable.resize(size);
 
 }
 
 Table::Table(unsigned int entries, std::istream& input {
+
+    size = entries;
+    hashTable.resize(size);
+    for (int i = 0; i < size; i++){
+      Entry x;
+      put(x);
+    }
+      
+    /*
     for (int i = 0; i < entries && std::getline(input); ++i) {
       std::string str;
       std::getline(input, str);
@@ -25,6 +35,7 @@ Table::Table(unsigned int entries, std::istream& input {
       hashTable(hashingFunction(newEntry))= newEntry;
     }
     sort(hashTable);
+    */
 }
 
 void Table::put(unsigned int key, std::string data) {
@@ -33,7 +44,6 @@ void Table::put(unsigned int key, std::string data) {
   newEntry.set_key(key);
   newEntry.set_data(data);
   hashTable(hashingFunction(newEntry)) = newEntry;
-  sort(hashTable);
 
 }
 
@@ -43,7 +53,6 @@ void Table::put(Entry e) {
   newEntry.set_key(e.get_key());
   newEntry.set_data(e.get_data());
   hashTable(hashingFunction(newEntry)) = newEntry;
-  sort(hashTable);
 
 }
 
@@ -121,19 +130,34 @@ void Table:: mergeSort(vector<int>& left, vector<int>& right, vector<Entry>& ent
   }
 }
 
-int Table::hashingFunction(Entry entry) {
-
-  return (entry.get_key()%size);
-  
-}
-
 std::ostream& operator<< (std::ostream out, const Table& t) {
 
-  sort(t);
+  std::vector<Entry> vector1;
+  for (int i = 0; i < t.size(); i++){
+    if (t[i].empty()){
+      continue;
+    }
+    for (int j = 0; j < t[i].size(); j++) {
+      vector1.push_back(t[i]);
+    }
+  }
+  
+  Entry data[vector2.size()];
+  
+  for(int i = 0; i < vector1.size(); i++) {
+    data[i] = vector1[i];
+  }
+
+  mergesort(data);
+  
+  for (int i = 0; i < data.size(); i++) {
+    out << data[i] << "\n";
+  }
+  /*
   for (i = 0; i < size; i++) {
     out.append(hashingTable(i).get_data(), "\n");
   }
   cout << out << endl;
+  */
   
-}
-  
+}// table.cpp
