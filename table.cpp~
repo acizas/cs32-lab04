@@ -4,7 +4,6 @@
 #include <iostream>
 #include "entry.h"
 #include <sstream>
-#include "table.h"
 
 Table::Table(unsigned int max_entries = 100) {
 
@@ -111,7 +110,7 @@ void Table:: mergeSort(vector<int>& left, vector<int>& right, vector<Entry>& ent
       entries[i] = right[k];
       k++;
     }
-    i++;
+    i++
   }
   while (j < nL){
     entries[i] = left[j];

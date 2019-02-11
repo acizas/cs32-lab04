@@ -4,8 +4,14 @@
 // 1:00-1:50 pm
 #ifndef table_h
 #define table_h
+#include<iostream>
+#include<list>
+#include "entry.h"
+#include <sstream>
 
 class Table {
+  int size;
+  
  public:
 
   // Constructor
@@ -26,12 +32,19 @@ class Table {
   // Removes an entry with the given key
   bool remove(unsigned int key);
 
+  // Sort the keys in the table
+  void sort(vector<int>& bar);
+
+  // Hashing function
+  int hashingFunction(int Entry);
+
+  // Mergesort the values of the table
+  void mergeSort(vector<int>& left, vector<int>& right, vector<int>& bars);
+  
   // Overloads the << operator to output entries on separate lines
-  std::ostream& operator<< (std::ostream& out, const Table& t);
+  friend std::ostream& operator<< (std::ostream& out, const Table& t);
 
  private:
-  std::vector<Entry> tableEntry;
-  std::vector<tableEntry> hashTable;
-  int hashkey();
+  std::vector<Entry> hashTable;
 
 #endif /* table_h */
