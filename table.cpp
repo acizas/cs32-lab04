@@ -40,7 +40,9 @@ Table::Table(unsigned int entries, std::istream& input {
 
 void Table::put(unsigned int key, std::string data) {
 
-  Entry newEntry;
+  unsigned int index = hashingFunction(key);
+  
+  hashTable[index].push_back(key)
   newEntry.set_key(key);
   newEntry.set_data(data);
   hashTable(hashingFunction(newEntry)) = newEntry;
