@@ -19,6 +19,9 @@ class Table {
   // Constructor by input stream
   Table(unsigned int entries, std::istream& input);
 
+  // Returns the size of the Hash Table
+  int getSize() const;
+
   // Creates new entry and puts it in the table
   void put(unsigned int key, std::string data);
 
@@ -31,16 +34,13 @@ class Table {
   // Removes an entry with the given key
   bool remove(unsigned int key);
 
-  // Hashing function
-  int hashingFunction(int Entry);
-
   // Overloads the << operator to output entries on separate lines
   friend std::ostream& operator<< (std::ostream& out, const Table& t);
 
  private:
   size_t size;
-  typedef std::vector<entry> entry;
-  std::vector<entry> hashTable;
+  typedef std::vector<Entry> entry;
+  std::vector<Entry> hashTable;
   size_t hashingFunction(int key){
     return key%size;
   }
@@ -51,6 +51,6 @@ class Table {
 };
 
 void mergeSort(Entry data[], size_t tableSize);
-void mergeSort(Entry data[], size_t a, size_t b);
+void merge(Entry data[], size_t n1, size_t n2);
 
 #endif /* table_h */

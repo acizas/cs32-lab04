@@ -14,122 +14,123 @@ Table::Table(unsigned int max_entries = 100) {
 
 }
 
-Table::Table(unsigned int entries, std::istream& input {
+Table::Table(unsigned int entries, std::istream& input) {
 
     size = entries;
     hashTable.resize(size);
     for (int i = 0; i < size; i++){
       Entry x;
       put(x);
-    }
-      
-    /*
-    for (int i = 0; i < entries && std::getline(input); ++i) {
-      std::string str;
-      std::getline(input, str);
-      std::string a = str.substr (0,5);
-      std::string b = str.substr (7,30);
-      Entry newEntry;
-      newEntry.set_key(a);
-      newEntry.set_data(b);
-      hashTable(hashingFunction(newEntry))= newEntry;
-    }
-    sort(hashTable);
-    */
+    } 
+  }
+  
+int Table::getSize() {
+
+  return size;
+
 }
 
 void Table::put(unsigned int key, std::string data) {
 
   unsigned int index = hashingFunction(key);
+
+  while (hashTable[index] != NULL && hashTable[index].get_key() != key) {
+    index = (index + 1) % size;
+  }
   
-  hashTable[index].push_back(key)
-  newEntry.set_key(key);
-  newEntry.set_data(data);
-  hashTable(hashingFunction(newEntry)) = newEntry;
+  if (hashTable[index] != NULL){
+    delete hashTable[index];
+  }
+  
+  hashTable[index] = new Entry(key, data);
 
 }
 
 void Table::put(Entry e) {
 
-  Entry newEntry;
-  newEntry.set_key(e.get_key());
-  newEntry.set_data(e.get_data());
-  hashTable(hashingFunction(newEntry)) = newEntry;
+  unsigned int index = hashingFunction(e.get_key());
+
+  while (hashTable[index] != NULL && hashTable[index]->get_key() != key) {
+    index = (index + 1) % size;
+  }
+  
+  if (hashTable[index] != NULL){
+    delete hashTable[index];
+  }
+  
+  hashTable.insert(index, new Entry(e.get_key(), e.get_data()));
 
 }
 
 std::string get(unsigned int key){
 
-  std::string result = hashTable.at(hashTable.begin()+hashingFunction(key)).get_data();
-  return result;
+  unsigned int index = hashingFunction(key);
+  while(hashTable[index] != NULL && hashTable[index]->get_key() != key){
+    index = (index + 1)&size;
+  }
+  if (hashTable[index]==NULL)
+    return 0;
+  else
+    return hashTable[index]->get_data();
 
 }
   
 void Table::remove(unsigned int key) {
 
-  hashTable.erase(hashTable.begin()+hashingFunction(key));
-  
-  /*
-  int index = hashingFunction(key);
-  list<Entry>::iterator i;
-  for (i = table[index].begin(); i != table[index].end(); i++) {
-    if (*i == key)
-      break;
+  vector<list<Entry>>::iterator a;
+  for (a=List.begin(); a != List.end(); a++){
+    if(find((*a).begin(), (*a).end(), key) != (*a).end()){
+      (*a).pop_back();
+    }
   }
-  if (i != table[index].end())
-    table[index].erase(i);
-  */
 }
   
-void Table::sort(vector<Entry>& table) {
+Void Table::mergeSort(Entry data[], size_t tableSize) {
 
-  if (table.size() <= 1){
-    return;
+  size_t n1;
+  size_t n2;
+
+  if (n > 1) {
+
+    n1 = n / 2;
+    n2 = n - n1;
+
+    mergeSort(data, n1);
+    mergeSort((data + n1), n2);
+
+    merge(data, n1, n2);
+    
   }
-
-  int middle = (table.size())/2;
-  vector<Entry> left;
-  left.reserve(middle);
-  right.reserve(table.size() - middle);
-  vector<Entry> right;
-
-  for (size_t j = 0; j < middle; j++){
-    left.push_back(table[j]);
-  }
-
-  for (size_t j = 0; j < (table.size() - middle); j++){
-    right.push_back(table[middle + j]);
-  }
-
-  sort(left);
-  sort(right);
-  mergeSort(left, right, table);
-
 }
 
-void Table:: mergeSort(vector<int>& left, vector<int>& right, vector<Entry>& entries) {
+void Table:: merge(int data[], size_t n1, size_t n2){
+
+  int *temp;
+  size_t copied = 0;
+  size_t copied1 = 0;
+  size_t copied2 = 0;
+  size_t i;
+
+  temp = new int[n1 + n2];
+
+  while((copied1 < n1) && (copied2 < n2)){
+
+    if (data[copied] < (data + n1)[copied2])
+      temp[copied++] = data[copied1++];
+    else
+      temp[copied++] = (data+n1)[copied2++];
+
+  }
+
+  while (copied1 < n1)
+    temp[copied++] = data[copied1++];
+  while (copied2 < n2)
+    temp[copied++] = (data+n1)[copied2++];
+
+  for (i=0; i<n1 + n2; ++1)
+    data[i] = temp[i];
+  delete[] temp;
   
-  int nL = left.size();
-  int nR = right.size();
-  int i=0;
-  int j=0;
-  int k=0;
-  while (j < nL && k < nR) {
-    if (left[j] < right[k]){
-      entries[i] = left[j];
-      j++;
-    }
-    else {
-      entries[i] = right[k];
-      k++;
-    }
-    i++;
-  }
-  while (j < nL){
-    entries[i] = left[j];
-    j++;
-    i++;
-  }
 }
 
 std::ostream& operator<< (std::ostream out, const Table& t) {
