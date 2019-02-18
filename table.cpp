@@ -166,37 +166,23 @@ void merge(std::vector<Entry>& A, std::vector<Entry>& array1,
 
 std::ostream& operator<< (std::ostream& out, const Table& t) {
 
-  //std::cout << "Getting max_entries" << std::endl;
-  // std::cout << t.num_entries << std::endl;
-   std::vector<Entry> vector1(t.num_entries);
-  // std::cout << "vector1" << " " << vector1.size()<< std::endl;
+  
+  std::vector<Entry> vector1(t.num_entries);
   for (int i = 0; i < t.hashTable.size(); i++){
     for (int j = 0; j < t.hashTable[i].size(); j++) {
       vector1.push_back(t.hashTable[i][j]);
     }
   }
-  //std::cout << "vector1" << " " << vector1.size()<< std::endl;
-  // std::cout << "for (int i = 0; i < t.hashTable.size(); i++)" << std::endl;
-     /*
-  Entry data[vector1.size()];
-  int dataSize;
-     std::cout << "data[]" << std::endl;
-     
-  for(int i = 0; i < vector1.size(); i++) {
-    data[i] = vector1[i];
-    dataSize++;
-  }
-     */
-     //std::cout << "for(int i = 0; i < vector1.size(); i++)" << std::endl;
+  
   mergeSort(vector1);
-
-  //std::cout << "mergeSort" << std::endl;
   
   for(Entry k: vector1){
     out << k << std::endl;
   }
   return out;
 }
+
+
 /*
   Entry data[vector2.getSize()];
   
