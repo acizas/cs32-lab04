@@ -6,152 +6,205 @@
 #include <sstream>
 #include "table.h"
 #include <string>
+#include <iterator>
 
-Table::Table(unsigned int max_entries = 100) {
+Table::Table(unsigned int max_entries) {
 
+  num_entries = 0;
   size = max_entries;
   hashTable.resize(size);
-
+   
 }
 
 Table::Table(unsigned int entries, std::istream& input) {
 
     size = entries;
     hashTable.resize(size);
-    for (int i = 0; i < size; i++){
-      Entry x;
-      put(x);
+    num_entries = entries;
+    Entry a;
+    for (int i = 0; i < entries; i++){
+      input >> a;
+      put(a);
     } 
   }
+Table::~Table() {
   
-int Table::getSize() {
+  hashTable.clear();
+  
+}
+  
+int Table::getSize() const {
 
   return size;
 
 }
 
+int Table::getMax_Entries() const {
+
+  return num_entries;
+
+}
+
 void Table::put(unsigned int key, std::string data) {
 
-  unsigned int index = hashingFunction(key);
-
-  while (hashTable[index] != NULL && hashTable[index].get_key() != key) {
-    index = (index + 1) % size;
-  }
+  Entry e;
+  e.set_key(key);
+  e.set_data(data);
+  put(e);
+  num_entries++;
   
-  if (hashTable[index] != NULL){
-    delete hashTable[index];
-  }
-  
-  hashTable[index] = new Entry(key, data);
-
 }
 
 void Table::put(Entry e) {
 
   unsigned int index = hashingFunction(e.get_key());
-
-  while (hashTable[index] != NULL && hashTable[index]->get_key() != key) {
-    index = (index + 1) % size;
+  if (!hashTable[index].empty()){
+    for (std::size_t i = 0; i < hashTable[index].size(); i++){
+      if (hashTable[index][i].get_key() == e.get_key()){
+	  hashTable[index][i] = e;
+	  return;
+	}
+    }
   }
   
-  if (hashTable[index] != NULL){
-    delete hashTable[index];
+  else {
+    hashTable[index].push_back(e);
+    num_entries++;
   }
-  
-  hashTable.insert(index, new Entry(e.get_key(), e.get_data()));
-
 }
 
-std::string get(unsigned int key){
+std::string Table::get(unsigned int key) const {
 
   unsigned int index = hashingFunction(key);
-  while(hashTable[index] != NULL && hashTable[index]->get_key() != key){
+  if (hashTable[index].size() == 0){
+    return "";
+  }
+  else {
+    for (std::size_t i = 0; i < hashTable[index].size(); i++){
+      if (hashTable[index][i].get_key() == key){
+	return hashTable[index][i].get_data();
+      }
+      else
+	return "";
+    }
+  }
+}
+
+/*
+  while(hashTable[index] != '\0' && hashTable[index]->get_key() != key){
     index = (index + 1)&size;
   }
-  if (hashTable[index]==NULL)
+  if (hashTable[index]== '\0')
     return 0;
   else
     return hashTable[index]->get_data();
-
 }
-  
-void Table::remove(unsigned int key) {
+*/
 
-  vector<list<Entry>>::iterator a;
-  for (a=List.begin(); a != List.end(); a++){
-    if(find((*a).begin(), (*a).end(), key) != (*a).end()){
-      (*a).pop_back();
+bool Table::remove(unsigned int key) {
+
+  unsigned int index = hashingFunction(key);
+  for (int i = 0; i < hashTable[index].size(); i++) {
+    if (hashTable[index][i].get_key() == key){
+      std::swap(hashTable[index][i],
+		hashTable[index][hashTable[index].size()-1]);
+      hashTable[index].pop_back();
+      num_entries--;
+      return true;
     }
-  }
-}
-  
-Void Table::mergeSort(Entry data[], size_t tableSize) {
-
-  size_t n1;
-  size_t n2;
-
-  if (n > 1) {
-
-    n1 = n / 2;
-    n2 = n - n1;
-
-    mergeSort(data, n1);
-    mergeSort((data + n1), n2);
-
-    merge(data, n1, n2);
-    
-  }
-}
-
-void Table:: merge(int data[], size_t n1, size_t n2){
-
-  int *temp;
-  size_t copied = 0;
-  size_t copied1 = 0;
-  size_t copied2 = 0;
-  size_t i;
-
-  temp = new int[n1 + n2];
-
-  while((copied1 < n1) && (copied2 < n2)){
-
-    if (data[copied] < (data + n1)[copied2])
-      temp[copied++] = data[copied1++];
     else
-      temp[copied++] = (data+n1)[copied2++];
-
+      return false;
   }
+}
 
-  while (copied1 < n1)
-    temp[copied++] = data[copied1++];
-  while (copied2 < n2)
-    temp[copied++] = (data+n1)[copied2++];
+void mergeSort(std::vector<Entry>& A) {
 
-  for (i=0; i<n1 + n2; ++1)
-    data[i] = temp[i];
-  delete[] temp;
+  if (1 < A.size()){
+    std::vector<Entry> array1(A.begin(), A.begin() + A.size() / 2);
+    //std::cout << "Iterator 1" << std::endl;
+    mergeSort(array1);
+    //std::cout << "Mergesort 1" << std::endl;
+    std::vector<Entry> array2(A.begin() + A.size()/2, A.end());
+    //std::cout << "Iterator 2" << std::endl;
+    mergeSort(array2);
+    //std::cout << "Mergesort 2" << std::endl;
+    merge(A, array1, array2);
+    //std::cout << "Merge" << std::endl;
+  }
   
 }
 
-std::ostream& operator<< (std::ostream out, const Table& t) {
-
-  std::vector<Entry> vector1;
-  for (int i = 0; i < t.size(); i++){
-    if (t[i].empty()){
-      continue;
+void merge(std::vector<Entry>& A, std::vector<Entry>& array1,
+		     std::vector<Entry>& array2){
+  int i, j, k;
+  for (i = 0, j = 0, k = 0; i < array1.size() && j < array2.size(); k++){
+    if ((((array1.at(i)).get_key())%(A.size()))
+	<= (((array2.at(j)).get_key()%(A.size())))){
+      A.push_back(array1.at(i));
+      i++;
     }
-    for (int j = 0; j < t[i].size(); j++) {
-      vector1.push_back(t[i]);
+    else if ((((array1.at(i)).get_key())%(A.size()))
+	     > (((array2.at(j)).get_key()%(A.size())))){
+      A.push_back(array2.at(j));
+     
+      j++;
+    }
+    k++;
+  }
+
+  while (i < array1.size()){
+    A.push_back(array2.at(j));
+    i++;
+  }
+
+  while (j < array2.size()){
+    A.push_back(array2.at(j));
+    j++;
+  }
+}
+
+
+std::ostream& operator<< (std::ostream& out, const Table& t) {
+
+  //std::cout << "Getting max_entries" << std::endl;
+  // std::cout << t.num_entries << std::endl;
+   std::vector<Entry> vector1(t.num_entries);
+  // std::cout << "vector1" << " " << vector1.size()<< std::endl;
+  for (int i = 0; i < t.hashTable.size(); i++){
+    for (int j = 0; j < t.hashTable[i].size(); j++) {
+      vector1.push_back(t.hashTable[i][j]);
     }
   }
-  
-  Entry data[vector2.size()];
-  
+  //std::cout << "vector1" << " " << vector1.size()<< std::endl;
+  // std::cout << "for (int i = 0; i < t.hashTable.size(); i++)" << std::endl;
+     /*
+  Entry data[vector1.size()];
+  int dataSize;
+     std::cout << "data[]" << std::endl;
+     
   for(int i = 0; i < vector1.size(); i++) {
+    data[i] = vector1[i];
+    dataSize++;
+  }
+     */
+     //std::cout << "for(int i = 0; i < vector1.size(); i++)" << std::endl;
+  mergeSort(vector1);
+
+  //std::cout << "mergeSort" << std::endl;
+  
+  for(Entry k: vector1){
+    out << k << std::endl;
+  }
+  return out;
+}
+/*
+  Entry data[vector2.getSize()];
+  
+  for(int i = 0; i < vector1.getSize(); i++) {
     data[i] = vector1[i];
   }
 
-  mergesort(data);
+  mergesort(data, sizeOf(data)/sizeOf(data[0]));
   
   for (int i = 0; i < data.size(); i++) {
     out << data[i] << "\n";
@@ -162,5 +215,4 @@ std::ostream& operator<< (std::ostream out, const Table& t) {
   }
   cout << out << endl;
   */
-  
-}// table.cpp
+// table.cpp

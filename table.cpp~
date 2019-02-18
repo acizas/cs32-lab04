@@ -4,134 +4,201 @@
 #include <iostream>
 #include "entry.h"
 #include <sstream>
+#include "table.h"
+#include <string>
 
-Table::Table(unsigned int max_entries = 100) {
+Table::Table(unsigned int max_entries) {
 
-  hashTable(max_entries);
+  max_entries = 100;
+  size = 2 * max_entries;
+  hashTable.resize(size);
 
 }
 
-Table::Table(unsigned int entries, std::istream& input {
-    for (int i = 0; i < entries && std::getline(input); ++i) {
-      std::string str;
-      std::getline(input, str);
-      std::string a = str.substr (0,5);
-      std::string b = str.substr (7,30);
-      Entry newEntry;
-      newEntry.set_key(a);
-      newEntry.set_data(b);
-      hashTable(hashingFunction(newEntry))= newEntry;
-    }
-    sort(hashTable);
+Table::Table(unsigned int entries, std::istream& input) {
+
+    size = 2 * entries;
+    entries = entries;
+    hashTable.resize(size);
+    Entry a;
+    for (int i = 0; i < size; i++){
+      input >> a;
+      put(a);
+    } 
+  }
+Table::~Table() {
+  
+  hashTable.clear();
+  
+}
+  
+int Table::getSize() const {
+
+  return size;
+
 }
 
 void Table::put(unsigned int key, std::string data) {
 
-  Entry newEntry;
-  newEntry.set_key(key);
-  newEntry.set_data(data);
-  hashTable(hashingFunction(newEntry)) = newEntry;
-  sort(hashTable);
-
+  Entry e;
+  e.set_key(key);
+  e.set_data(data);
+  put(e);
+  max_entries++;
+  
 }
 
 void Table::put(Entry e) {
 
-  Entry newEntry;
-  newEntry.set_key(e.get_key());
-  newEntry.set_data(e.get_data());
-  hashTable(hashingFunction(newEntry)) = newEntry;
-  sort(hashTable);
-
+  unsigned int index = hashingFunction(e.get_key());
+  if (!hashTable[index].empty()){
+    for (std::size_t i = 0; i < hashTable[index].size(); i++){
+      if (hashTable[index][i].get_key() == e.get_key()){
+	  hashTable[index][i] = e;
+	  return;
+	}
+    }
+  }
+  
+  else {
+    hashTable[index].push_back(e);
+    max_entries++;
+  }
 }
 
-std::string get(unsigned int key){
+std::string Table::get(unsigned int key) const {
 
-  std::string result = hashTable.at(hashTable.begin()+hashingFunction(key)).get_data();
-  return result;
+  unsigned int index = hashingFunction(key);
+  if (hashTable[index].size() == 0){
+    return "";
+  }
+  else {
+    for (std::size_t i = 0; i < hashTable[index].size(); i++){
+      if (hashTable[index][i].get_key() == key){
+	return hashTable[index][i].get_data();
+      }
+      else
+	return "";
+    }
+  }
+}
 
+/*
+  while(hashTable[index] != '\0' && hashTable[index]->get_key() != key){
+    index = (index + 1)&size;
+  }
+  if (hashTable[index]== '\0')
+    return 0;
+  else
+    return hashTable[index]->get_data();
+}
+*/
+
+bool Table::remove(unsigned int key) {
+
+  unsigned int index = hashingFunction(key);
+  for (int i = 0; i < hashTable[index].size(); i++) {
+    if (hashTable[index][i].get_key() == key){
+      std::swap(hashTable[index][i],
+		hashTable[index][hashTable[index].size()-1]);
+      hashTable[index].pop_back();
+      max_entries--;
+      return true;
+    }
+    else
+      return false;
+  }
+}
+
+void merge(Entry data[], size_t n1, size_t n2){
+
+  Entry temp[n1+n2];
+  for (unsigned int i = 0; i < n1+n2-1; i++) {
+    temp[i] = data[i];
+  }
+  size_t copied = 0;
+  size_t copied1 = 0;
+  size_t copied2 = 0;
+  size_t i;
+
+  while((copied1 < n1) && (copied2 < n2)){
+
+    if (data[copied] < (data + n1)[copied2])
+      temp[copied++] = data[copied1++];
+    else
+      temp[copied++] = (data+n1)[copied2++];
+
+  }
+
+  while (copied1 < n1)
+    temp[copied++] = data[copied1++];
+  while (copied2 < n2)
+    temp[copied++] = (data+n1)[copied2++];
+
+  for (i=0; i<n1 + n2; ++i)
+    data[i] = temp[i];
+  //  delete[] temp;
+  
 }
   
-void Table::remove(unsigned int key) {
+void mergeSort(Entry data[], size_t tableSize) {
 
-  hashTable.erase(hashTable.begin()+hashingFunction(key));
+  size_t n1;
+  size_t n2;
+
+  if (tableSize > 1) {
+
+    n1 = tableSize / 2;
+    n2 = tableSize - n1;
+
+    mergeSort(data, n1);
+    mergeSort((data + n1), n2);
+
+    merge(data, n1, n2);
+    
+  }
+}
+
+std::ostream& operator<< (std::ostream& out, const Table& t) {
+
+  std::vector<Entry> vector1;
+  for (int i = 0; i < t.hashTable.size(); i++){
+    for (int j = 0; j < t.hashTable[i].size(); j++) {
+      vector1.push_back(t.hashTable[i][j]);
+    }
+  }
   
+  Entry data[vector1.size()];
+  int dataSize;
+  
+  for(int i = 0; i < vector1.size(); i++) {
+    data[i] = vector1[i];
+    dataSize++;
+  }
+  
+  mergeSort(data, dataSize);
+  
+  for(Entry k: vector1){
+    out << k << std::endl;
+  }
+  return out;
+}
+/*
+  Entry data[vector2.getSize()];
+  
+  for(int i = 0; i < vector1.getSize(); i++) {
+    data[i] = vector1[i];
+  }
+
+  mergesort(data, sizeOf(data)/sizeOf(data[0]));
+  
+  for (int i = 0; i < data.size(); i++) {
+    out << data[i] << "\n";
+  }
   /*
-  int index = hashingFunction(key);
-  list<Entry>::iterator i;
-  for (i = table[index].begin(); i != table[index].end(); i++) {
-    if (*i == key)
-      break;
-  }
-  if (i != table[index].end())
-    table[index].erase(i);
-  */
-}
-  
-void Table::sort(vector<Entry>& table) {
-
-  if (table.size() <= 1){
-    return;
-  }
-
-  int middle = (table.size())/2;
-  vector<Entry> left;
-  left.reserve(middle);
-  right.reserve(table.size() - middle);
-  vector<Entry> right;
-
-  for (size_t j = 0; j < middle; j++){
-    left.push_back(table[j]);
-  }
-
-  for (size_t j = 0; j < (table.size() - middle); j++){
-    right.push_back(table[middle + j]);
-  }
-
-  sort(left);
-  sort(right);
-  mergeSort(left, right, table);
-
-}
-
-void Table:: mergeSort(vector<int>& left, vector<int>& right, vector<Entry>& entries) {
-  
-  int nL = left.size();
-  int nR = right.size();
-  int i=0;
-  int j=0;
-  int k=0;
-  while (j < nL && k < nR) {
-    if (left[j] < right[k]){
-      entries[i] = left[j];
-      j++;
-    }
-    else {
-      entries[i] = right[k];
-      k++;
-    }
-    i++
-  }
-  while (j < nL){
-    entries[i] = left[j];
-    j++;
-    i++;
-  }
-}
-
-int Table::hashingFunction(Entry entry) {
-
-  return (entry.get_key()%size);
-  
-}
-
-std::ostream& operator<< (std::ostream out, const Table& t) {
-
-  sort(t);
   for (i = 0; i < size; i++) {
     out.append(hashingTable(i).get_data(), "\n");
   }
   cout << out << endl;
-  
-}
-  
+  */
+// table.cpp

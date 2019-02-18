@@ -19,8 +19,14 @@ class Table {
   // Constructor by input stream
   Table(unsigned int entries, std::istream& input);
 
+  // Destructor
+  ~Table();
+
   // Returns the size of the Hash Table
   int getSize() const;
+
+  // Returns max entries
+  int getMax_Entries() const;
 
   // Creates new entry and puts it in the table
   void put(unsigned int key, std::string data);
@@ -38,9 +44,10 @@ class Table {
   friend std::ostream& operator<< (std::ostream& out, const Table& t);
 
  private:
-  size_t size;
-  typedef std::vector<Entry> entry;
-  std::vector<Entry> hashTable;
+  int size;
+  size_t num_entries;
+  typedef std::vector<std::vector<Entry>> entry;
+  std::vector<std::vector<Entry>> hashTable;
   size_t hashingFunction(int key){
     return key%size;
   }
@@ -50,7 +57,10 @@ class Table {
   
 };
 
-void mergeSort(Entry data[], size_t tableSize);
-void merge(Entry data[], size_t n1, size_t n2);
+//void mergeSort(Entry data[], size_t tableSize);
+//void merge(Entry data[], size_t n1, size_t n2);
+
+void mergeSort(std::vector<Entry>& A);
+void merge(std::vector<Entry>& A, std::vector<Entry>& array1,std::vector<Entry>& array2);
 
 #endif /* table_h */
