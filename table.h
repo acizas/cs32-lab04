@@ -1,6 +1,6 @@
 // Andrew Cizas
 // table.h
-// W19 - Lab04
+// W19 - Lab05
 // 1:00-1:50 pm
 #ifndef table_h
 #define table_h
@@ -18,9 +18,6 @@ class Table {
 
   // Constructor by input stream
   Table(unsigned int entries, std::istream& input);
-
-  // Destructor
-  ~Table();
 
   // Returns the size of the Hash Table
   int getSize() const;
@@ -46,8 +43,8 @@ class Table {
  private:
   int size;
   size_t num_entries;
-  typedef std::vector<std::vector<Entry>> entry;
-  std::vector<std::vector<Entry>> hashTable;
+  typedef std::vector<std::vector<Entry> > entry;
+  std::vector<std::vector<Entry> > hashTable;
   size_t hashingFunction(int key){
     return key%size;
   }
@@ -59,6 +56,9 @@ class Table {
 
 //void mergeSort(Entry data[], size_t tableSize);
 //void merge(Entry data[], size_t n1, size_t n2);
+
+//void mergeSort(std::vector<Entry>& A);
+//void merge(std::vector<Entry>& A, std::vector<Entry>& array1,std::vector<Entry>& array2);
 
 void mergeSort(std::vector<Entry>& A);
 void merge(std::vector<Entry>& A, std::vector<Entry>& array1,std::vector<Entry>& array2);
